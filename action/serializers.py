@@ -9,10 +9,6 @@ from os import path
 import os
 
 
-def handle_uploaded_file(path, f):
-    with open(path, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
 
 
 class ActionSerializer(serializers.ModelSerializer):
@@ -21,21 +17,6 @@ class ActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Action
         fields = ['video', 'series_id']
-
-    def create(self, validated_data):
-        series_id = validated_data['series_id']
-        series = get_object_or_404(ActionSeries, id=series_id)
-        folder_name = '{}_{}'.format(series.id, series.name)
-        folder_path = path.join(MEDIA_ROOT, folder_name)
-
-        if not path.isdir(folder_path):
-            os.mkdir(folder_path)
-
-        file_path = path.join(folder_path, validated_data['video'].name)
-        file_url = '{}/{}'.format(folder_name, validated_data['video'].name)
-
-        handle_uploaded_file(file_path, validated_data['video'])
-        return Action.objects.create(series=series, video=file_url)
 
 
 class ActionSeriesSerializer(serializers.ModelSerializer):
